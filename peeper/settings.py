@@ -13,3 +13,7 @@ SPIDER_MODULES = ['peeper.spiders']
 NEWSPIDER_MODULE = 'peeper.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 
+ITEM_PIPELINES = [
+  'peeper.pipelines.JsonWriterPipeline'
+]
+
