@@ -1,0 +1,1 @@
+-e git+https://github.com/Kami/python-face-client@5ff153bc66855f4b534db4b127cd9fe23be160f7#egg=face_client-dev
