@@ -53,16 +53,66 @@ class FaceProcessPipeline(object):
         if all(k in item for k in ('face_info', 'face_file')):
             im = Image.open('output/face/raw/%s' % item['face_file'])
             info = item['face_info']
-            bbox = im.getbbox()
-            bwidth = bbox[2] - bbox[0]
-            bheight = bbox[3] - bbox[1]
-            cbox = (
-              max(bbox[0], int(bwidth * (info['center']['x'] - info['width']  / 2)) / 100),
-              max(bbox[1], int(bheight * (info['center']['y'] - info['height'] / 2)) / 100),
-              min(bbox[2], int(bwidth * (info['center']['x'] + info['width']  / 2)) / 100),
-              min(bbox[3], int(bheight * (info['center']['y'] + info['height'] / 2)) / 100),
-            )
-            im = im.crop(cbox)
+            bound = self.bound(im)
+            face = self.face(bound, info)
+            size = self.size(bound, face)
+
+            # push the box up a little
+            face['center']['y'] -= size * 0.2
+
+            o = {
+                'x': min(bound['x'][1] - size, max(bound['x'][0], face['center']['x'] - size / 2)),
+                'y': min(bound['y'][1] - size, max(bound['y'][0], face['center']['y'] - size / 2)),
+            }
+
+            im = im.crop((
+                int(o['x']),
+                int(o['y']),
+                int(o['x'] + size),
+                int(o['y'] + size)
+            ))
             if not os.access('output/face/processed', os.F_OK): os.makedirs('output/face/processed')
             im.save('output/face/processed/%s.jpg' % item['face_file']);
         return item
+
+    # the width/height of the square cropped box
+    def size(self, bound, face):
+        return min(
+            bound['size']['x'],
+            bound['size']['y'],
+            2.5 * max(
+                face['size']['x'],
+                face['size']['y'],
+            ),
+        )
+
+    # convert percentages to pixels
+    def face(self, bound, info):
+        return {
+            'center': {
+                'x': bound['size']['x'] * info['center']['x'] / 100,
+                'y': bound['size']['y'] * info['center']['y'] / 100,
+            },
+            'size': {
+                'x': bound['size']['x'] * info['width'] / 100,
+                'y': bound['size']['y'] * info['height'] / 100,
+            },
+        }
+
+    # just reformat the result of im.getbbox()
+    def bound(self, im):
+        bbox = im.getbbox()
+        return {
+            'size': {
+                'x': bbox[2] - bbox[0],
+                'y': bbox[3] - bbox[1],
+            },
+            'x': [
+                bbox[0],
+                bbox[2],
+            ],
+            'y': [
+                bbox[1],
+                bbox[3]
+            ],
+        }
