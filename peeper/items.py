@@ -3,5 +3,9 @@
 from scrapy.item import Item, Field
 
 class PeeperItem(Item):
-    img_url = Field()
+    url = Field()
     name = Field()
+    img_urls = Field()
+    face_url = Field()
+    face_info = Field()
+    face_file = Field()

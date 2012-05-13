@@ -5,7 +5,6 @@
 #
 #     http://doc.scrapy.org/topics/settings.html
 #
-
 BOT_NAME = 'peeper'
 BOT_VERSION = '1.0'
 
@@ -14,6 +13,9 @@ NEWSPIDER_MODULE = 'peeper.spiders'
 USER_AGENT = '%s/%s' % (BOT_NAME, BOT_VERSION)
 
 ITEM_PIPELINES = [
-  'peeper.pipelines.JsonWriterPipeline'
+  'peeper.pipelines.face_pipeline.FaceDetectPipeline',
+  'peeper.pipelines.face_pipeline.FaceDownloadPipeline',
+  'peeper.pipelines.face_pipeline.FaceProcessPipeline',
+  'peeper.pipelines.json_pipeline.JsonWritePipeline',
 ]
 
